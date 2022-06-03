@@ -459,7 +459,7 @@ export default {
     },
     getVersionsList() {
       this.loading = true;
-      this.$http.get(`${this.$serverApiLink}api/account/builds/list/${this.$route.params.uid}/${this.sort}/${this.offset}`).
+      this.$http.get(`${this.$serverApiLink}api/admin/builds/list/${this.$route.params.uid}/${this.sort}/${this.offset}`).
       then(
           response => {
             this.list = response.data.list;
