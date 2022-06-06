@@ -176,6 +176,13 @@
                       @update="updateFile"
                   />
                 </v-col>
+                <v-col md="12" sm="12" cols="12" class="pb-4">
+                  <DropZone
+                      ref="certZone"
+                      :label="$tr('project', 'key_331')"
+                      @update="updateCert"
+                  />
+                </v-col>
               </v-row>
             </v-container>
           </v-card-text>
@@ -224,10 +231,14 @@ export default {
     issuerId: "",
     keyId: "",
     file: null,
+    cert: null
   }),
   methods: {
     updateFile(file) {
       this.file = file;
+    },
+    updateCert(file) {
+      this.cert = file;
     },
     removeItem(index) {
       this.$store.commit('setLoading', true);
@@ -252,6 +263,7 @@ export default {
       this.$store.commit('setLoading', true);
       let params = new FormData();
       params.set('api_key', this.file );
+      params.set('cert', this.cert );
       params.set('name', this.name );
       params.set('issuer_id', this.issuerId );
       params.set('key_id', this.keyId );
@@ -265,6 +277,7 @@ export default {
             this.issuerId = "";
             this.keyId = "";
             this.$refs.dropZone.clean();
+            this.$refs.certZone.clean();
             this.$store.commit('setLoading', false);
           }
       ).catch(
