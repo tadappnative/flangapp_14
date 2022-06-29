@@ -60,6 +60,9 @@
     >
       {{ $tr("auth", "key_15") }}
     </v-btn>
+    <template v-if="$store.state.config.google.enabled">
+      <GoogleIdentity :key-id="$store.state.config.google.id"  @callback="startGoogleLogin"/>
+    </template>
     <div class="caption text-center smoke--text mt-7 mb-7">
       {{ $tr("auth", "key_11") }}
     </div>
@@ -72,10 +75,12 @@
 </template>
 
 <script>
+import GoogleIdentity from "@/components/blocks/GoogleIdentity";
+
 export default {
   name: 'Register',
   components: {
-
+    GoogleIdentity
   },
   data: () => ({
     email: "",
@@ -106,6 +111,27 @@ export default {
               message: error.response.data.message
             });
             this.loading = false;
+          }
+      );
+    },
+    startGoogleLogin(tokenID) {
+      this.$store.commit('setLoading', true);
+      let params = new URLSearchParams();
+      params.append('id_token', tokenID );
+      this.$http.post(`${this.$serverApiLink}api/auth/google_in`, params)
+          .then(
+              response => {
+                this.$store.commit('setUser', response.data.user);
+                this.$store.commit('setLoading', false);
+                this.$router.push({name: 'Apps'});
+              }
+          ).catch(
+          error => {
+            this.$store.commit('setSnackBar', {
+              code: !error.response ? 408 : error.response.status,
+              message: error.response.data.message
+            });
+            this.$store.commit('setLoading', false);
           }
       );
     }

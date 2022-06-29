@@ -1,3 +1,3 @@
 export const config = {
-    "serverUrl": "/backend/"
+    "serverUrl": "https://demo.flangapp.com/backend/",
 };

@@ -38,69 +38,189 @@
           <div class="body-2 mb-12">
             {{ app.name }}: {{ $tr('project', 'key_306') }}
           </div>
-          <div class="block_width mb-5">
-            <div class="caption smoke--text mb-3">
-              {{ $tr('project', 'key_307') }}
-            </div>
-            <v-item-group
-                mandatory
-                class="mb-2"
-                v-model="plan"
-            >
-              <v-row>
-                <v-col
-                    v-for="(item, i) in plans"
-                    :key="`${i}_app_plan_layout`"
-                    cols="12"
-                    md="12"
-                    @click="plan = i"
-                >
-                  <v-card
-                      outlined
-                      :class="`pa-3 ${plan === i ? 'app_template active' : 'app_template'}`"
+          <template v-if="step === 1">
+            <div class="block_width mb-5">
+              <div class="caption smoke--text mb-3">
+                {{ $tr('project', 'key_307') }}
+              </div>
+              <v-item-group
+                  mandatory
+                  class="mb-2"
+                  v-model="plan"
+              >
+                <v-row>
+                  <v-col
+                      v-for="(item, i) in plans"
+                      :key="`${i}_app_plan_layout`"
+                      cols="12"
+                      md="12"
+                      @click="plan = i"
                   >
-                    <div class="d-flex justify-space-between align-center">
-                      <div>
+                    <v-card
+                        outlined
+                        :class="`pa-3 ${plan === i ? 'app_template active' : 'app_template'}`"
+                    >
+                      <div class="d-flex justify-space-between align-center">
+                        <div>
+                          <div class="title">
+                            {{ item.count }} <span class="body-2">{{ $tr('project', 'key_308') }}</span>
+                          </div>
+                          <div class="caption smoke--text" v-if="i === 0">
+                            {{ $tr('project', 'key_309') }}
+                          </div>
+                          <div class="caption success--text font-weight-bold" v-else>
+                            {{ $tr('project', 'key_310') }} {{ item.save }} {{ item.currency }}
+                          </div>
+                        </div>
                         <div class="title">
-                          {{ item.count }} <span class="body-2">{{ $tr('project', 'key_308') }}</span>
-                        </div>
-                        <div class="caption smoke--text" v-if="i === 0">
-                          {{ $tr('project', 'key_309') }}
-                        </div>
-                        <div class="caption success--text font-weight-bold" v-else>
-                          {{ $tr('project', 'key_310') }} {{ item.save }} {{ item.currency }}
+                          {{ item.price }} {{ item.symbol }}
                         </div>
                       </div>
-                      <div class="title">
-                        {{ item.price }} {{ item.symbol }}
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-item-group>
+              <v-btn
+                  v-if="app.uid !== undefined || !loading"
+                  block
+                  depressed
+                  color="primary"
+                  large
+                  class="mt-8"
+                  @click="goToMethods"
+              >
+                {{ $tr('project', 'key_16') }}
+              </v-btn>
+            </div>
+          </template>
+          <template v-else-if="step === 2">
+            <div class="block_width mb-5">
+              <div class="d-flex justify-start align-center mb-3">
+                <v-btn
+                    icon
+                    color="smoke"
+                    small
+                    class="mr-3"
+                    @click="step = 1"
+                >
+                  <v-icon small>mdi-arrow-left</v-icon>
+                </v-btn>
+                <div class="caption smoke--text">
+                  {{ $tr('project', 'key_200') }}
+                </div>
+              </div>
+              <v-item-group
+                  mandatory
+                  class="mb-2"
+                  v-model="method"
+              >
+                <v-row>
+                  <v-col
+                      v-for="(item, i) in methods"
+                      :key="`${i}_deposit_method`"
+                      cols="12"
+                      md="12"
+                      @click="method = i"
+                  >
+                    <v-card
+                        outlined
+                        :class="`pa-3 ${method === i ? 'app_template active' : 'app_template'}`"
+                    >
+                      <div class="d-flex justify-start align-center">
+                        <img :src="item.logo" width="52" class="rounded-circle mr-4"/>
+                        <div class="title">
+                          {{ item.name }}
+                        </div>
                       </div>
-                    </div>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-item-group>
-            <div class="caption smoke--text mt-3 mb-3">
-              {{ $tr('project', 'key_311') }}
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-item-group>
+              <v-btn
+                  v-if="app.uid !== undefined || !loading"
+                  block
+                  depressed
+                  color="primary"
+                  large
+                  class="mt-8"
+                  @click="goToPay"
+              >
+                {{ $tr('project', 'key_16') }}
+              </v-btn>
             </div>
-            <div class="mb-5">
-              <stripe-element-card
-                  :key="`${$store.state.darkMode}_stripe_key_${key}`"
-                  ref="elementRef"
-                  class="red--text"
-                  :pk="$store.state.config.stripe_key"
-                  :classes="classes"
-                  :elementStyle="stylesCard"
-                  @token="tokenCreated"
-                  @loading="loadingStripe"
-              />
+          </template>
+          <template v-if="step === 3">
+            <div class="block_width mb-5">
+              <div class="d-flex justify-start align-center mb-3">
+                <v-btn
+                    icon
+                    color="smoke"
+                    small
+                    class="mr-3"
+                    @click="step = 2"
+                >
+                  <v-icon small>mdi-arrow-left</v-icon>
+                </v-btn>
+                <div class="caption smoke--text">
+                  {{ $tr('project', 'key_311') }}
+                </div>
+              </div>
+              <div class="mb-5">
+                <stripe-element-card
+                    :key="`${$store.state.darkMode}_stripe_key_${key}`"
+                    ref="elementRef"
+                    class="red--text"
+                    :pk="$store.state.config.stripe_key"
+                    :classes="classes"
+                    :elementStyle="stylesCard"
+                    @token="tokenCreated"
+                    @loading="loadingStripe"
+                />
+              </div>
+              <v-btn v-if="app.uid !== undefined || !loading" block depressed color="primary" large @click="submitStripeForm">
+                {{ $tr('project', 'key_312') }} {{ totalPrice }} {{ currency }}
+              </v-btn>
             </div>
-            <v-btn v-if="app.uid !== undefined || !loading" block depressed color="primary" large @click="submitStripeForm">
-              {{ $tr('project', 'key_312') }} {{ totalPrice }} {{ currency }}
-            </v-btn>
-          </div>
+          </template>
         </template>
       </div>
     </div>
+    <template v-if="!loading">
+      <form ref="ppForm" method="POST" :action="methods[method].api_value_2">
+        <input type='hidden' name='business' :value='methods[method].api_value_1'>
+        <input type='hidden' name='item_name' :value="$tr('project', 'key_305')">
+        <input type='hidden' name='custom' :value='app.uid'>
+        <input type='hidden' name='item_number' :value='plans[plan].id'>
+        <input type='hidden' name='amount' :value='totalPrice'>
+        <input type='hidden' name='no_shipping' value='1'>
+        <input type='hidden' name='currency_code' :value='currencyCode'>
+        <input type='hidden' name='cancel_return' :value='returnUrl'>
+        <input type='hidden' name='return' value=''>
+        <input type="hidden" name="cmd" value="_xclick">
+      </form>
+    </template>
+    <template v-if="razorOrderID">
+      <Razorpay
+        :keyID="methods[method].api_value_1"
+        :amount="totalPrice * 100"
+        :currency="currencyCode"
+        :name="`${app.name}: ${$tr('project', 'key_306')}`"
+        :orderID="razorOrderID"
+        @success="createTransactionRazor"
+      />
+    </template>
+    <template v-if="openPayStack">
+      <Paystack
+          :email="$store.state.user.email"
+          :currency="currencyCode"
+          :keyID="methods[method].api_value_1"
+          :amount="totalPrice * 100"
+          :planID="plans[plan].id"
+          :appUID="app.uid"
+          @close="openPayStack = false"
+          @success="createTransactionStack"
+      />
+    </template>
   </v-card>
 </template>
 
@@ -110,14 +230,18 @@ import Logo from "@/assets/images/logosvg.svg";
 import Loader from "@/components/blocks/Loader";
 import AppIcon from "@/components/blocks/AppIcon";
 import { StripeElementCard } from '@vue-stripe/vue-stripe';
+import Razorpay from "@/components/payment/Razorpay";
+import Paystack from "@/components/payment/Paystack";
 
 export default {
   name: 'Deposit',
   components: {
     CancelIcon,
     Loader,
+    AppIcon,
     StripeElementCard,
-    AppIcon
+    Razorpay,
+    Paystack
   },
   props: {
     app: {
@@ -137,8 +261,23 @@ export default {
     accessSource: false,
     isRequest: false,
     key: 1,
+    methods: [],
+    step: 1,
+    method: 0,
+    razorOrderID: null,
+    openPayStack: false
   }),
   computed: {
+    totalPrice: function () {
+      let total = this.plans[this.plan].price * 1;
+      return total.toFixed(2);
+    },
+    currency: function () {
+      return this.plans[this.plan].symbol;
+    },
+    currencyCode: function () {
+      return this.plans[this.plan].currency;
+    },
     stylesCard: function () {
       return {
         base: {
@@ -154,15 +293,38 @@ export default {
         }
       };
     },
-    totalPrice: function () {
-      let total = this.plans[this.plan].price * 1;
-      return total.toFixed(2);
-    },
-    currency: function () {
-      return  this.plans[this.plan].symbol;
+    returnUrl: function () {
+      return window.location;
+    }
+  },
+  watch: {
+    method: function () {
+      this.razorOrderID = null;
+      this.openPayStack = false;
     }
   },
   methods: {
+    goToPay() {
+      console.log(this.methods[this.method].id);
+      if (this.methods[this.method].id === 1) {
+        // stripe
+        this.step = 3;
+      } else if (this.methods[this.method].id === 2) {
+        // paypal
+        this.$store.commit('setLoading', true);
+        const form = this.$refs.ppForm
+        form.submit();
+      } else if (this.methods[this.method].id === 3) {
+        // razorpay
+        this.createOrderRazor();
+      } else if (this.methods[this.method].id === 4) {
+        // paystack
+        this.openPayStack = true;
+      }
+    },
+    goToMethods() {
+      this.step = 2;
+    },
     submitStripeForm() {
       this.$refs.elementRef.submit();
     },
@@ -170,6 +332,81 @@ export default {
       if (!this.isRequest) {
         this.$store.commit('setLoading', status);
       }
+    },
+    createTransactionStack(reference) {
+      this.openPayStack = false;
+      this.$store.commit('setLoading', true);
+      this.$http.get(`${this.$serverApiLink}api/account/deposit/paystack_make_pay/${reference}`).then(
+          // eslint-disable-next-line no-unused-vars
+          response => {
+            this.$store.commit('setLoading', false);
+            this.$store.commit('setSnackBar', {
+              code: 200,
+              message: [this.$tr("project", "key_313")]
+            });
+            this.$emit("add", this.plans[this.plan].count);
+            this.step = 1;
+            this.method = 0;
+            this.$emit("close");
+          }
+      ).catch(
+          error => {
+            this.$store.commit('setSnackBar', {
+              code: !error.response ? 408 : error.response.status,
+              message: error.response.data.message
+            });
+            this.$store.commit('setLoading', false);
+          }
+      );
+    },
+    createTransactionRazor(payment) {
+      this.razorOrderID = null;
+      this.$store.commit('setLoading', true);
+      let params = new URLSearchParams();
+      params.append('order_id', payment.razorpay_order_id);
+      params.append('razorpay_payment_id', payment.razorpay_payment_id);
+      params.append('razorpay_signature', payment.razorpay_signature);
+      this.$http.post(`${this.$serverApiLink}api/account/deposit/razorpay_make_pay`, params).then(
+          // eslint-disable-next-line no-unused-vars
+          response => {
+            this.$store.commit('setLoading', false);
+            this.$store.commit('setSnackBar', {
+              code: 200,
+              message: [this.$tr("project", "key_313")]
+            });
+            this.$emit("add", this.plans[this.plan].count);
+            this.step = 1;
+            this.method = 0;
+            this.$emit("close");
+          }
+      ).catch(
+          error => {
+            this.$store.commit('setSnackBar', {
+              code: !error.response ? 408 : error.response.status,
+              message: error.response.data.message
+            });
+            this.$store.commit('setLoading', false);
+          }
+      );
+    },
+    createOrderRazor() {
+      this.razorOrderID = null;
+      this.$store.commit('setLoading', true);
+      this.$http.get(`${this.$serverApiLink}api/account/deposit/create_order_razorpay/${this.app.uid}/${this.plans[this.plan].id}`).then(
+          response => {
+            this.$store.commit('setLoading', false);
+            this.razorOrderID = response.data.id;
+          }
+      ).catch(
+          error => {
+            this.$store.commit('setSnackBar', {
+              code: !error.response ? 408 : error.response.status,
+              message: error.response.data.message
+            });
+            this.$store.commit('setLoading', false);
+            this.isRequest = false;
+          }
+      );
     },
     tokenCreated(token) {
       this.isRequest = true;
@@ -187,6 +424,8 @@ export default {
               message: [this.$tr("project", "key_313")]
             });
             this.$emit("add", this.plans[this.plan].count);
+            this.step = 1;
+            this.method = 0;
             this.$emit("close");
           }
       ).catch(
@@ -206,6 +445,23 @@ export default {
       then(
           response => {
             this.plans = response.data.list;
+            this.getDepositMethods();
+          }
+      ).catch(
+          error => {
+            this.$store.commit('setSnackBar', {
+              code: !error.response ? 408 : error.response.status,
+              message: error.response.data.message
+            });
+            this.loading = false;
+          }
+      );
+    },
+    getDepositMethods() {
+      this.$http.get(`${this.$serverApiLink}api/account/deposit/methods`).
+      then(
+          response => {
+            this.methods = response.data.list;
             this.loading = false;
           }
       ).catch(

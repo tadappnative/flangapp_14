@@ -121,48 +121,62 @@
                       v-model="name"
                   ></v-text-field>
                 </v-col>
-                <v-col md="12" sm="12" cols="12" class="pb-0">
-                  <v-text-field
-                      :label="$tr('project', 'key_167')"
-                      outlined
-                      color="primary"
-                      dense
-                      v-model="alias"
-                  ></v-text-field>
+                <v-col md="12" sm="12" cols="12" class="pb-0 pt-0">
+                  <div class="d-flex justify-space-between align-center">
+                    <div class="body-1 black--text">
+                      {{ $tr('project', 'key_332') }}
+                    </div>
+                    <v-switch
+                        color="primary"
+                        inset
+                        v-model="customKey"
+                    ></v-switch>
+                  </div>
                 </v-col>
-                <v-col md="12" sm="12" cols="12" class="pb-0">
-                  <v-text-field
-                      :label="$tr('project', 'key_168')"
-                      outlined
-                      color="primary"
-                      dense
-                      type="password"
-                      v-model="keystorePassword"
-                  ></v-text-field>
-                </v-col>
-                <v-col md="12" sm="12" cols="12" class="pb-0">
-                  <v-text-field
-                      :label="$tr('project', 'key_169')"
-                      outlined
-                      color="primary"
-                      dense
-                      type="password"
-                      v-model="keyPassword"
-                  ></v-text-field>
-                </v-col>
-                <v-col md="12" sm="12" cols="12" class="pb-4">
-                  <DropZone
-                      ref="dropZone"
-                      :label="$tr('project', 'key_170')"
-                      @update="updateFile"
-                  />
-                </v-col>
+                <template v-if="customKey">
+                  <v-col md="12" sm="12" cols="12" class="pb-0">
+                    <v-text-field
+                        :label="$tr('project', 'key_167')"
+                        outlined
+                        color="primary"
+                        dense
+                        v-model="alias"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col md="12" sm="12" cols="12" class="pb-0">
+                    <v-text-field
+                        :label="$tr('project', 'key_168')"
+                        outlined
+                        color="primary"
+                        dense
+                        type="password"
+                        v-model="keystorePassword"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col md="12" sm="12" cols="12" class="pb-0">
+                    <v-text-field
+                        :label="$tr('project', 'key_169')"
+                        outlined
+                        color="primary"
+                        dense
+                        type="password"
+                        v-model="keyPassword"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col md="12" sm="12" cols="12" class="pb-4">
+                    <DropZone
+                        ref="dropZone"
+                        :label="$tr('project', 'key_170')"
+                        @update="updateFile"
+                    />
+                  </v-col>
+                </template>
               </v-row>
             </v-container>
           </v-card-text>
           <v-divider/>
           <v-container fluid class="text-right">
-            <v-btn color="primary" depressed @click="saveItem">
+            <v-btn color="primary" depressed @click="saveKey">
               {{ $tr('project', 'key_277') }}
             </v-btn>
           </v-container>
@@ -206,10 +220,40 @@ export default {
     keystorePassword: "",
     keyPassword: "",
     file: null,
+    customKey: false
   }),
   methods: {
     updateFile(file) {
       this.file = file;
+    },
+    saveKey() {
+      if (!this.customKey) {
+        this.createKey();
+      } else {
+        this.saveItem();
+      }
+    },
+    createKey() {
+      this.$store.commit('setLoading', true);
+      let params = new FormData();
+      params.set('name', this.name );
+      this.$http.post(
+          `${this.$serverApiLink}api/account/signs/create_keystore/${this.$route.params.id}`, params).then(
+          response => {
+            this.list.push(response.data.item);
+            this.name = "";
+            this.dialog = false;
+            this.$store.commit('setLoading', false);
+          }
+      ).catch(
+          error => {
+            this.$store.commit('setSnackBar', {
+              code: !error.response ? 408 : error.response.status,
+              message: error.response.data.message
+            });
+            this.$store.commit('setLoading', false);
+          }
+      );
     },
     removeItem(index) {
       this.$store.commit('setLoading', true);

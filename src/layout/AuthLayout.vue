@@ -15,8 +15,6 @@
 
 <script>
 import Logo from "../assets/images/logosvg.svg";
-import GoogleAuth from '@/config/google_oAuth.js'
-import Vue from "vue";
 export default {
   name: 'AuthLayout',
   components: {
@@ -26,12 +24,7 @@ export default {
     logoSvg: Logo
   }),
   mounted() {
-    const gauthOption = {
-      clientId: this.$store.state.config.google.id,
-      scope: 'profile email',
-      prompt: 'select_account'
-    }
-    Vue.use(GoogleAuth, gauthOption);
+
   }
 }
 </script>

@@ -45,6 +45,7 @@ import CustomerProfile from "@/views/control/customers/CustomerProfile";
 import CustomerTickets from "@/views/control/customers/CustomerTickets";
 import CustomerTransactions from "@/views/control/customers/CustomerTransactions";
 import CustomerKeyAndroid from "@/views/control/customers/CustomerKeyAndroid";
+import Methods from "@/views/control/deposit/Methods";
 import store from "@/store";
 import axios from "axios";
 import {config} from "@/config/config";
@@ -264,6 +265,14 @@ const routes = [
         path: '/admin/transactions',
         name: 'AdminTransactions',
         component: AdminTransactions,
+        meta: {
+          sidebar: 'admin'
+        }
+      },
+      {
+        path: '/admin/deposit',
+        name: 'Methods',
+        component: Methods,
         meta: {
           sidebar: 'admin'
         }

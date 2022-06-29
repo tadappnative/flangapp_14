@@ -190,41 +190,6 @@
             </v-col>
             <v-col md="6" sm="12" cols="12">
               <v-text-field
-                  :label="$tr('admin', 'key_31')"
-                  outlined
-                  color="primary"
-                  dense
-                  hide-details
-                  v-model="stripe_publish_key"
-              ></v-text-field>
-            </v-col>
-            <v-col md="6" sm="12" cols="12">
-              <v-text-field
-                  :label="$tr('admin', 'key_32')"
-                  outlined
-                  color="primary"
-                  dense
-                  hide-details
-                  :type="!hide.stripe_secret_key ? 'password' : 'text'"
-                  v-model="stripe_secret_key"
-              >
-                <template v-slot:append>
-                  <v-btn
-                      icon
-                      width="40"
-                      depressed
-                      height="40"
-                      color="smoke"
-                      @click="hide.stripe_secret_key = !hide.stripe_secret_key"
-                      style="margin-bottom: 7px"
-                  >
-                    <v-icon v-text="!hide.stripe_secret_key ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"/>
-                  </v-btn>
-                </template>
-              </v-text-field>
-            </v-col>
-            <v-col md="6" sm="12" cols="12">
-              <v-text-field
                   :label="$tr('admin', 'key_36')"
                   outlined
                   color="primary"
@@ -360,12 +325,33 @@
             </v-col>
           </v-row>
         </Container>
+        <Container v-else-if="tab === 2">
+          <div
+              :class="`font-weight-bold caption mb-5 mt-2 ${!license.status ? 'red--text' : 'success--text'}`"
+          >
+            {{ !license.status ? $tr('admin', 'key_105') : $tr('admin', 'key_104') }}
+          </div>
+          <v-row>
+            <v-col md="6" sm="12" cols="12">
+              <v-text-field
+                  :label="$tr('admin', 'key_103')"
+                  outlined
+                  color="primary"
+                  dense
+                  hide-details
+                  :readonly="tab === 2 && license.status"
+                  v-model="license.key"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </Container>
       </template>
       <Footer
           v-if="!loading"
           ref="footer"
           :loading="isUpdate"
           :full_width="true"
+          :hide_action="tab === 2 && license.status"
           @click="startUpdate"
       />
     </v-main>
@@ -392,7 +378,8 @@ export default {
     tabs: function () {
       return [
         this.$tr('admin', 'key_12'),
-        this.$tr('admin', 'key_13')
+        this.$tr('admin', 'key_13'),
+        this.$tr('admin', 'key_102')
       ];
     },
     statusItems: function () {
@@ -421,8 +408,6 @@ export default {
     github_repo: "",
     codemagic_key: "",
     codemagic_id: "",
-    stripe_publish_key: "",
-    stripe_secret_key: "",
     ionic_icons: "",
     google_id: "",
     google_enabled: "0",
@@ -448,6 +433,10 @@ export default {
       upload: false,
       loading: false
     },
+    license: {
+      status: false,
+      key: ""
+    }
   }),
   methods: {
     updateTab(value) {
@@ -488,8 +477,10 @@ export default {
     startUpdate() {
       if (!this.tab) {
         this.updateGlobal();
-      } else {
+      } else if (this.tab === 1) {
         this.updateEmailConfig();
+      } else {
+        this.updateLicense();
       }
     },
     getEmailConfig() {
@@ -506,6 +497,28 @@ export default {
               message: error.response.data.message
             });
             this.loading = false;
+          }
+      );
+    },
+    updateLicense() {
+      this.isUpdate = true;
+      let params = new URLSearchParams();
+      params.append('code', this.license.key);
+      this.$http.post(`${this.$serverApiLink}api/admin/settings/update_license`, params).
+      then(
+          // eslint-disable-next-line no-unused-vars
+          response => {
+            this.isUpdate = false;
+            this.license.status = true;
+            this.$refs.footer.showSuccessAlert();
+          }
+      ).catch(
+          error => {
+            this.$store.commit('setSnackBar', {
+              code: !error.response ? 408 : error.response.status,
+              message: error.response.data.message
+            });
+            this.isUpdate = false;
           }
       );
     },
@@ -551,11 +564,13 @@ export default {
             this.github_repo = data.github_repo;
             this.codemagic_key = data.codemagic_key;
             this.codemagic_id = data.codemagic_id;
-            this.stripe_publish_key = data.stripe_publish_key;
-            this.stripe_secret_key = data.stripe_secret_key;
             this.ionic_icons = data.ionic_icons;
             this.google_id = data.google_id;
             this.google_enabled = data.google_enabled;
+            this.license = {
+              status: data.license.length,
+              key: data.license
+            }
             this.getEmailConfig();
           }
       ).catch(
@@ -579,8 +594,6 @@ export default {
       params.append('github_repo', this.github_repo);
       params.append('codemagic_key', this.codemagic_key);
       params.append('codemagic_id', this.codemagic_id);
-      params.append('stripe_publish_key', this.stripe_publish_key);
-      params.append('stripe_secret_key', this.stripe_secret_key);
       params.append('ionic_icons', this.ionic_icons);
       params.append('google_id', this.google_id);
       params.append('google_enabled', this.google_enabled);

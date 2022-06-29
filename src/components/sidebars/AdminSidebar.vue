@@ -19,7 +19,8 @@
               <MailStackIcon v-else-if="index === 3" :size="22"/>
               <MoneyTransferIcon v-else-if="index === 4" :size="22"/>
               <TagIcon v-else-if="index === 5" :size="22"/>
-              <GearIcon v-else-if="index === 6" :size="22"/>
+              <CreditCardIcon v-else-if="index === 6" :size="22"/>
+              <GearIcon v-else-if="index === 7" :size="22"/>
             </div>
           </v-list-item-avatar>
           <v-list-item-content>
@@ -40,6 +41,7 @@ import MailStackIcon from "@/components/icons/MailStackIcon";
 import MoneyTransferIcon from "@/components/icons/MoneyTransferIcon";
 import TagIcon from "@/components/icons/TagIcon";
 import GearIcon from "@/components/icons/GearIcon";
+import CreditCardIcon from "@/components/icons/CreditCardIcon";
 export default {
   name: 'AdminSidebar',
   components: {
@@ -50,7 +52,8 @@ export default {
     MailStackIcon,
     MoneyTransferIcon,
     TagIcon,
-    GearIcon
+    GearIcon,
+    CreditCardIcon
   },
   data: () => ({
     items: [
@@ -77,6 +80,10 @@ export default {
       {
         name: "key_9",
         to: "Plans"
+      },
+      {
+        name: "key_94",
+        to: "Methods"
       },
       {
         name: "key_6",

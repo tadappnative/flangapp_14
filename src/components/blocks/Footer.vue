@@ -56,7 +56,8 @@ export default {
     },
     full_width: {
       type: Boolean
-    }
+    },
+
   },
   data: () => ({
     success_alert: false
