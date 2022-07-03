@@ -66,8 +66,10 @@
             :name="app.name"
             :link="app.link"
             :image="app.icon"
+            :balance="app.balance"
             @onStart="loading = true"
             @onLoad="onLoad"
+            @updateBalance="updateBuilds"
         />
       </template>
       <template v-if="actionbar === 'customer'">
@@ -180,6 +182,9 @@ export default {
     },
     addBuild(count) {
       this.balance.value = this.balance.value + count;
+    },
+    updateBuilds(count) {
+      this.app.balance = count;
     },
     onLoad(app) {
       this.app = app;

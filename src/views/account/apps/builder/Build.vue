@@ -424,7 +424,7 @@ export default {
       this.$http.post(`${this.$serverApiLink}api/account/builds/create/${this.$route.params.uid}`, params).
       then(
           response => {
-            this.list.push(response.data.detail);
+            this.list.unshift(response.data.detail);
             this.dialog = false;
             this.$store.commit('setLoading', false);
           }
