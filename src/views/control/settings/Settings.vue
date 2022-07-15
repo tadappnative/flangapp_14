@@ -233,6 +233,16 @@
                   v-model="google_enabled"
               ></v-select>
             </v-col>
+            <v-col md="6" sm="12" cols="12">
+              <v-select
+                  :items="statusItems"
+                  dense
+                  hide-details
+                  :label="$tr('admin', 'key_109')"
+                  outlined
+                  v-model="qr"
+              ></v-select>
+            </v-col>
           </v-row>
         </Container>
         <Container v-else-if="tab === 1">
@@ -411,6 +421,7 @@ export default {
     ionic_icons: "",
     google_id: "",
     google_enabled: "0",
+    qr: "0",
     hide: {
       github_token: false,
       codemagic_key: false,
@@ -567,6 +578,7 @@ export default {
             this.ionic_icons = data.ionic_icons;
             this.google_id = data.google_id;
             this.google_enabled = data.google_enabled;
+            this.qr = data.qr;
             this.license = {
               status: data.license.length,
               key: data.license
@@ -597,6 +609,7 @@ export default {
       params.append('ionic_icons', this.ionic_icons);
       params.append('google_id', this.google_id);
       params.append('google_enabled', this.google_enabled);
+      params.append('qr', this.qr);
       this.$http.post(`${this.$serverApiLink}api/admin/settings/update_global`, params).
       then(
           // eslint-disable-next-line no-unused-vars

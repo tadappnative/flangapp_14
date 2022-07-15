@@ -24,7 +24,8 @@ export default new Vuex.Store({
         id: ""
       },
       stripe_key: "",
-      ionic_icons: ""
+      ionic_icons: "",
+      qr_preview: false
     },
     user: {
       email: '',
@@ -44,7 +45,10 @@ export default new Vuex.Store({
     left_drawer: true,
     right_drawer: true,
     current_balance: 0,
-    preview_agree: false
+    preview_agree: false,
+    previewDevices: [],
+    isQrPreview: false,
+    runPreview: true
   },
   mutations: {
     setAuthTokens(state, value) {
@@ -109,6 +113,23 @@ export default new Vuex.Store({
     },
     setRightDrawer(state, value) {
       state.right_drawer = value;
+    },
+    setPreviewDevices(state, value) {
+      state.previewDevices = value;
+    },
+    setQrPreview(state, value) {
+      state.isQrPreview = value;
+    },
+    pushPreviewDevices(state, value) {
+      let check = state.previewDevices.find(device => device.id === value.id);
+      if (!check) {
+        state.previewDevices.push(value);
+        let audio = new Audio(require('../assets/audio/connect.mp3'));
+        audio.play();
+      }
+    },
+    setRunPreview(state, value) {
+      state.runPreview = value;
     },
   },
   actions: {

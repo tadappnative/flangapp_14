@@ -1,5 +1,5 @@
 export const HEADER_JS = `import React from 'react'
-import {StyleSheet, Platform, Text, View} from 'react-native';
+import {StyleSheet, Platform, Text, View, useWindowDimensions} from 'react-native';
 import {StatusBar} from "expo-status-bar";
 import Constants from "expo-constants";
 import { config } from "../config";
@@ -8,52 +8,113 @@ import IconButton from "./IconButton";
 const Header = (props) => {
 
     const { back, title, onNavigation, onOpenDrawer, statusColor, onBack } = props;
+    const { height, width } = useWindowDimensions();
+
+    const iosTitlePadding = () => {
+        let total = (config.barNavigation.length * 24) + (config.barNavigation.length * 16);
+        if (back || config.appTemplate === 0) {
+          if (config.barNavigation.length) {
+            total = total - 32;
+          }
+        }
+        return total;
+    }
+
+    const iosTitlePaddingRight = () => {
+        let total = 0;
+        if (back || config.appTemplate === 0) {
+          if (!config.barNavigation.length) {
+            total = 32;
+          }
+        }
+        return total;
+    }
 
     return (
         <React.Fragment>
             <View style={styles.navbar}>
-                <View style={styles.leftAbsolute}>
-                    { back
-                        ? <IconButton
-                            size={32}
-                            icon={Platform.OS === "ios" ? "chevron-back-outline" : "arrow-back-outline"}
-                            style={ Platform.OS === "ios" ? { marginTop: 4 } : { marginTop: 18 } }
-                            onTap={() => onBack()}
-                        />
-                        : config.appTemplate === 0
+                { Platform.OS === "ios" ? <React.Fragment>
+                    <View>
+                        { back
                             ? <IconButton
                                 size={32}
-                                icon={"menu-outline"}
-                                style={ Platform.OS === "ios" ? { marginTop: 4 } : { marginTop: 18 } }
-                                onTap={() => onOpenDrawer()}
+                                icon={"chevron-back-outline"}
+                                onTap={() => onBack()}
                             />
-                            : null
-                    }
-                </View>
-                <Text
-                    ellipsizeMode='tail'
-                    numberOfLines={1}
-                    style={[
-                        styles.title, Platform.OS === "ios" ? styles.iosTitle : styles.mdTitle,
-                        Platform.OS === "android" && config.appTemplate  === 0 ? { paddingLeft: 48 } : {},
-                        Platform.OS === "android" && back ? { paddingLeft: 48 } : {},
-                    ]}
-                >
-                    {title.length < 19
-                        ? title
-                        : title.substring(0, 19) + '...'}
-                </Text>
-                <View style={styles.rightAbsolute}>
-                    {config.barNavigation.map((item, index) => (
-                        <IconButton
-                            icon={item.icon}
-                            size={24}
-                            key={"bar_" + index}
-                            style={ Platform.OS === "ios" ? { marginTop: 4, marginLeft: 16 } : { marginTop: 20,  marginLeft: 16 } }
-                            onTap={() => onNavigation(item)}
-                        />
-                    ))}
-                </View>
+                            : config.appTemplate === 0
+                                ? <IconButton
+                                    size={32}
+                                    icon={"menu-outline"}
+                                    onTap={() => onOpenDrawer()}
+                                />
+                                : null
+                        }
+                    </View>
+                    <Text
+                        ellipsizeMode='tail'
+                        numberOfLines={1}
+                        style={[
+                            styles.titleMainIOS,
+                            styles.iosTitle,
+                            { paddingLeft: iosTitlePadding(), paddingRight: iosTitlePaddingRight() }
+                        ]}
+                    >
+                        {title.length < 20
+                            ? title
+                            : title.substring(0, 20) + '...'}
+                    </Text>
+                    <View style={styles.rightActions}>
+                        {config.barNavigation.map((item, index) => (
+                            <IconButton
+                                icon={item.icon}
+                                size={24}
+                                key={"bar_" + index}
+                                style={ { marginLeft: 16 } }
+                                onTap={() => onNavigation(item)}
+                            />
+                        ))}
+                    </View>
+                </React.Fragment> : <React.Fragment>
+                    <View style={[styles.startAndroid]}>
+                        { back
+                            ? <IconButton
+                                size={32}
+                                icon={"arrow-back-outline"}
+                                style={{ marginRight: 16 }}
+                                onTap={() => onBack()}
+                            />
+                            : config.appTemplate === 0
+                                ? <IconButton
+                                    size={32}
+                                    icon={"menu-outline"}
+                                    onTap={() => onOpenDrawer()}
+                                />
+                                : null
+                        }
+                        <Text
+                            ellipsizeMode='tail'
+                            numberOfLines={1}
+                            style={[
+                                styles.titleMainAndroid,
+                                styles.mdTitle,
+                            ]}
+                        >
+                            { title }
+                        </Text>
+                    </View>
+                    <View/>
+                    <View style={[styles.rightActionsAndroid]}>
+                        {config.barNavigation.map((item, index) => (
+                            <IconButton
+                                icon={item.icon}
+                                size={24}
+                                key={"bar_" + index}
+                                style={ { marginLeft: 16 } }
+                                onTap={() => onNavigation(item)}
+                            />
+                        ))}
+                    </View>
+                </React.Fragment> }
             </View>
             <StatusBar style={statusColor ? 'light' : 'dark'}/>
         </React.Fragment>
@@ -62,7 +123,7 @@ const Header = (props) => {
 
 const styles = StyleSheet.create({
     navbar: {
-        height: 90,
+        height: Platform.OS === "ios" ? (54 + Constants.statusBarHeight) : 90,
         width: '100%',
         backgroundColor: config.color,
         paddingTop: Constants.statusBarHeight,
@@ -73,38 +134,36 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         textAlign: 'center',
     },
-    title: {
+    titleMainIOS: {
         color: config.isDark ? "#ffffff" : "#000000",
-        fontSize: Platform.OS === "ios" ? 18 : 21,
+        fontSize: 18,
         flex: 1,
-        textAlign: Platform.OS === "ios" ? 'center' : 'left',
+        textAlign: 'center'
+    },
+    titleMainAndroid: {
+        color: config.isDark ? "#ffffff" : "#000000",
+        fontSize: 21,
+        textAlign: 'left',
     },
     mdTitle : {
         fontFamily: 'sans-serif-medium',
-        fontWeight: 'normal',
+        fontWeight: 'normal'
     },
     iosTitle: {
         fontWeight: '600'
     },
-    leftAbsolute: {
-        top: Constants.statusBarHeight,
-        left: Platform.OS === "ios" ? 10 : 16,
-        position: "absolute",
-        justifyContent: 'flex-start',
+    rightActions: {
+        display: 'flex',
         flexDirection: 'row',
-        alignItems: 'center',
-        textAlign: 'center',
-        zIndex: 1,
     },
-    rightAbsolute: {
-        top: Constants.statusBarHeight,
-        right: Platform.OS === "ios" ? 10 : 16,
-        position: "absolute",
-        justifyContent: 'flex-start',
+    rightActionsAndroid: {
+        display: 'flex',
         flexDirection: 'row',
-        alignItems: 'center',
-        textAlign: 'center',
-        zIndex: 1
+    },
+    startAndroid: {
+        display: 'flex',
+        flexDirection: 'row',
+        flex: 1,
     }
 });
 

@@ -48,7 +48,15 @@
         style="overflow: hidden auto"
         v-model="$store.state.right_drawer"
     >
-      <Preview :uid="app.uid"/>
+      <Preview ref="refPreview" :uid="app.uid"/>
+      <template v-slot:append>
+        <DevicesList v-if="$store.state.isQrPreview"/>
+        <PreviewConsole
+            v-else
+            @make_screenshot="previewMakeScreenshot"
+            @make_reload="previewReloadApp"
+        />
+      </template>
     </v-navigation-drawer>
     <v-navigation-drawer
         v-if="actionbar !== undefined"
@@ -121,7 +129,9 @@ import BuilderAdminSidebar from "@/components/sidebars/BuilderAdminSidebar";
 import CustomerSidebar from "@/components/sidebars/CustomerSidebar";
 import Deposit from "@/components/modals/Deposit";
 import Preview from "@/components/sidebars/Preview";
+import DevicesList from "@/components/sidebars/DevicesList";
 import { UpdateSnack } from "@/snack/build";
+import PreviewConsole from "@/components/sidebars/PreviewConsole";
 
 export default {
   name: 'PrivateLayout',
@@ -140,7 +150,9 @@ export default {
     BuilderAdminSidebar,
     CustomerSidebar,
     Deposit,
-    Preview
+    Preview,
+    DevicesList,
+    PreviewConsole
   },
   data: () => ({
     sidebar: null,
@@ -160,7 +172,7 @@ export default {
       uid: undefined,
       user_id: 0
     },
-    loading: true
+    loading: true,
   }),
   watch: {
     '$route.meta': function() {
@@ -168,6 +180,12 @@ export default {
     },
   },
   methods: {
+    previewMakeScreenshot() {
+      this.$refs.refPreview.getScreenshot();
+    },
+    previewReloadApp() {
+      this.$refs.refPreview.getRestart();
+    },
     reloadPreview(object) {
       UpdateSnack(object.uid, object.mode)
     },

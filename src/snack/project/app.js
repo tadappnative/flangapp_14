@@ -11,6 +11,7 @@ import {
     ImageBackground,
     Linking,
     Share,
+    BackHandler
 } from 'react-native';
 import Header from "./components/Header";
 import Spinner from "./components/Spinner";
@@ -45,6 +46,9 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener("hardwareBackPress", () => this.handleBackButtonPress())
+        }
         if (config.appTemplate === 1 && config.mainNavigation.length > 0) {
             let array = [];
             let backs = [];
@@ -84,6 +88,19 @@ class App extends React.Component {
                 init: true
             });
         }
+    }
+    
+    handleBackButtonPress = () => {
+      if (this.state.collection.length) {
+        if (this.state.backs[this.state.currentIndex]) {
+          this.state.collection[this.state.currentIndex].controller.goBack();
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
     }
 
     eventStartLoad(value, index) {
@@ -375,7 +392,7 @@ const styles = StyleSheet.create({
         backgroundColor : 'white',
         position: 'relative',
         marginBottom: config.appTemplate !== 3 ? 90 : 0,
-        paddingBottom: config.appTemplate === 1 ? Platform.OS === "ios" ? 83 : 60 : 0,
+        paddingBottom: config.appTemplate === 1 ? Platform.OS === "ios" ? 43 + Constants.statusBarHeight : 60 : 0,
         paddingTop: config.appTemplate === 3 ? Platform.OS === "ios" ? Constants.statusBarHeight : 0 : 0,
         zIndex: 5
     },
@@ -384,7 +401,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        height: Platform.OS === "ios" ? 83 : 60,
+        height: Platform.OS === "ios" ? 43 + Constants.statusBarHeight : 60,
         paddingHorizontal: 0,
         justifyContent: 'center',
         borderTopWidth: 1,
@@ -441,7 +458,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: '100%',
         height: 5,
-        top: 90,
+        top: Platform.OS === "ios" ? (54 + Constants.statusBarHeight) : 90,
         zIndex: 3
     }
 });

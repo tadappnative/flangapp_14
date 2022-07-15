@@ -24,7 +24,7 @@
           {{ $tr("project", "key_316") }}
         </div>
       </v-overlay>
-      <div class="text-center" style="overflow: hidden auto">
+      <div class="d-flex justify-center align-center" style="overflow: hidden auto;">
         <v-btn-toggle
             v-model="platform"
             rounded
@@ -37,23 +37,56 @@
           <v-btn small>
             <v-icon :size="20" color="#00de7a">mdi-android</v-icon>
           </v-btn>
+          <v-btn small v-if="$store.state.config.qr_preview">
+            <v-icon :size="20" color="primary">mdi-qrcode</v-icon>
+          </v-btn>
         </v-btn-toggle>
       </div>
-      <div class="preview_container">
-        <iframe
-            ref="iframe_preview"
-            :src="!platform ? `https://appetize.io/embed/8bnmakzrptf1hv9dq7v7bnteem?autoplay=false&debug=true&device=iphone12&deviceColor=${deviceColor}&embed=true&orientation=portrait&screenOnly=false&xDocMsg=true&xdocMsg=true&params=%7B%22EXKernelLaunchUrlDefaultsKey%22:%22${src}%22,%22EXKernelDisableNuxDefaultsKey%22:true%7D&scale=75&osVersion=13.7` :
+      <div :class="platform !== 2 ? 'preview_container' : 'preview_qr'">
+        <template v-if="platform !== 2">
+          <iframe
+              ref="iframe_preview"
+              :src="!platform ? `https://appetize.io/embed/8bnmakzrptf1hv9dq7v7bnteem?autoplay=false&debug=true&device=iphone12&deviceColor=${deviceColor}&embed=true&orientation=portrait&screenOnly=false&xDocMsg=true&xdocMsg=true&params=%7B%22EXKernelLaunchUrlDefaultsKey%22:%22${src}%22,%22EXKernelDisableNuxDefaultsKey%22:true%7D&scale=75&osVersion=13.7` :
 `https://appetize.io/embed/xc1w6f1krd589zhp22a0mgftyw?autoplay=false&debug=true&device=pixel4&deviceColor=${deviceColor}&embed=true&launchUrl=${src}&orientation=portrait&screenOnly=false&xDocMsg=true&xdocMsg=true&params=%7B%22EXKernelLaunchUrlDefaultsKey%22:%22${src}%22,%22EXKernelDisableNuxDefaultsKey%22:true%7D&scale=81`"
-            class="preview_frame"
-            scrolling="no"
-        ></iframe>
-        <div v-if="runBtn" class="run_preview">
-          <div class="d-flex justify-center mt-4">
-            <v-btn class="font-weight-bold" depressed light color="white_only" large width="190" height="60" @click="openRunDialog">
-              {{ $tr("project", "key_317") }}
-            </v-btn>
+              class="preview_frame"
+              scrolling="no"
+          ></iframe>
+          <div v-if="runBtn" class="run_preview">
+            <div class="d-flex justify-center mt-4">
+              <v-btn class="font-weight-bold" depressed light color="white_only" large width="190" height="60" @click="openRunDialog">
+                {{ $tr("project", "key_317") }}
+              </v-btn>
+            </div>
           </div>
-        </div>
+        </template>
+        <template v-else>
+          <div class="text-center font-weight-bold mb-5 body-2">
+            {{ $tr("project", "key_334") }}
+          </div>
+          <v-card outlined width="312" height="312" class="d-flex justify-center align-center pa-1">
+            <div>
+              <v-progress-circular
+                  indeterminate
+                  color="smoke"
+                  width="2"
+                  style="z-index: 1; position: absolute; left: 135px; top: 135px"
+              ></v-progress-circular>
+              <div style="z-index: 2">
+                <img :src="`https://chart.googleapis.com/chart?chs=450x450&cht=qr&choe=UTF-8&chl=${src}`" style="width: 100%; position: relative; z-index: 10;"/>
+              </div>
+            </div>
+          </v-card>
+          <div style="padding-right: 12px">
+            <v-row class="mt-5">
+              <v-col cols="12" sm="6" md="6">
+                <img :src="appleBadge" style="width: 100%; cursor: pointer" @click="goExpoIos"/>
+              </v-col>
+              <v-col cols="12" sm="6" md="6">
+                <img :src="googleBadge" style="width: 100%; cursor: pointer" @click="goExpoAndroid"/>
+              </v-col>
+            </v-row>
+          </div>
+        </template>
       </div>
     </div>
     <div v-else class="d-flex justify-center align-center" style="height: 100vh">
@@ -135,12 +168,14 @@ import { snack, UpdateSnack } from "@/snack/build";
 import RtcBigIcon from "@/components/icons/RtcBigIcon";
 import FlipBigIcon from "@/components/icons/FlipBigIcon";
 import AlertDeviceBigIcon from "@/components/icons/AlertDeviceBigIcon";
+import GoogleBadge from "@/assets/images/googleplay.svg";
+import AppleBadge from "@/assets/images/appstore.svg";
 export default {
   name: 'Preview',
   components: {
     RtcBigIcon,
     FlipBigIcon,
-    AlertDeviceBigIcon
+    AlertDeviceBigIcon,
   },
   props: {
     uid: {
@@ -158,16 +193,24 @@ export default {
     runBtn: true,
     src: undefined,
     dialog: false,
-    showMode: false
+    showMode: false,
+    appleBadge: AppleBadge,
+    googleBadge: GoogleBadge
   }),
   watch: {
-    platform() {
+    platform(value) {
       this.overlay = {
         type: 'default',
         position: 0,
         status: false
       };
       this.runBtn = true;
+      this.$store.commit('setRunPreview', true);
+      if (value === 2) {
+        this.$store.commit('setQrPreview', true);
+      } else {
+        this.$store.commit('setQrPreview', false);
+      }
     }
   },
   computed: {
@@ -176,6 +219,12 @@ export default {
     }
   },
   methods: {
+    goExpoIos() {
+      window.open("https://itunes.apple.com/app/apple-store/id982107779");
+    },
+    goExpoAndroid() {
+      window.open("https://play.google.com/store/apps/details?id=host.exp.exponent");
+    },
     openRunDialog() {
       if (!this.$store.state.preview_agree) {
         this.dialog = true;
@@ -189,6 +238,21 @@ export default {
         console.log(r);
         this.src = r.url;
         UpdateSnack(this.$route.params.uid, "app");
+        snack.addStateListener((state, prevState) => {
+          if (this.platform === 2) {
+            if (state.connectedClients !== prevState.connectedClients) {
+              for (const key in state.connectedClients) {
+                if (!prevState.connectedClients[key]) {
+                  this.$store.commit('pushPreviewDevices', {
+                    id: state.connectedClients[key].id,
+                    name: state.connectedClients[key].name,
+                    platform: state.connectedClients[key].platform
+                  });
+                }
+              }
+            }
+          }
+        });
       }).catch(y => {
         console.log(y);
       });
@@ -213,12 +277,22 @@ export default {
         status: false
       };
       this.runBtn = true;
+      this.$store.commit('setRunPreview', true);
+    },
+    getScreenshot() {
+      let iframe = this.$refs.iframe_preview;
+      iframe.contentWindow.postMessage('saveScreenshot', '*');
+    },
+    getRestart() {
+      let iframe = this.$refs.iframe_preview;
+      iframe.contentWindow.postMessage('restartApp', '*');
     },
     messageEventHandler(event) {
       if(event.data === 'sessionRequested'){
         // request session
         console.log(event.data);
         this.runBtn = false;
+        this.$store.commit('setRunPreview', false);
       } else if (event.data === 'sessionQueued') {
         // session to pool
         console.log(event.data);
@@ -260,6 +334,7 @@ export default {
           status: false
         };
         this.runBtn = true;
+        this.$store.commit('setRunPreview', true);
       }
     }
   },
@@ -270,6 +345,8 @@ export default {
   beforeDestroy() {
     window.removeEventListener('message', this.messageEventHandler, false);
     this.$emit('toggle', 0);
+    this.$store.commit('setQrPreview', false);
+    this.$store.commit('setPreviewDevices', []);
   }
 }
 </script>

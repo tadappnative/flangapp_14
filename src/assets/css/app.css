@@ -655,6 +655,13 @@ a {
     margin: auto auto auto 10px;
     z-index: 2;
 }
+.preview_qr {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    margin: auto auto auto 10px;
+    z-index: 2;
+}
 .preview_frame {
     width: 9999px;
     height: 9999px;
@@ -693,4 +700,34 @@ a {
 }
 .active_modal_list {
     background: transparent!important;
+}
+.connection_devices {
+    height: 72px;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    z-index: 2;
+}
+.theme--light .connection_devices {
+    background: #ffffff;
+    border-top: 1px solid rgba(64,89,133, 0.12);
+    border-left: 1px solid rgba(64,89,133, 0.12);
+}
+.theme--dark .connection_devices {
+    background: #111120;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+.theme--light .device_icon {
+    border-radius: 10px;
+    border: 1px solid rgba(64,89,133, 0.12);
+}
+.theme--dark .device_icon {
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.fab_screenshot {
+    position: absolute;
+    top: 8px;
+    left: 135px;
 }
